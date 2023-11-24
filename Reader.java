@@ -43,7 +43,7 @@ public class Reader {
         return trigramAssociations;
     }
 
-    private static List<String> createTrigram(String mot) {
+    static List<String> createTrigram(String mot) {
         List<String> trigrammes = new ArrayList<>();
         for (int i = 0; i < mot.length() - 2; i++) {
             trigrammes.add(mot.substring(i, i + 3));
@@ -59,6 +59,6 @@ public class Reader {
 
 
     public static void main(String[] args) {
-        triGramFinder("C:\\Users\\chris\\Downloads\\TP2\\test.txt");
+        triGramFinder("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt");
     }
 }
