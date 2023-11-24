@@ -8,7 +8,7 @@ public class Correction {
     private static List<String> dictionary = new ArrayList<>();
     private static HashMap<String, List<String>> dicoTrigramMap = new HashMap<>();
 
-    static List<String> correction(String word) {
+    static List<String> correction(String word, String path) {
 
         if (inDictionary(word)) {
             System.out.printf("\n --> the word \"%s\" is in the dictionary, no need to correct it ! \n", word);
@@ -17,7 +17,7 @@ public class Correction {
 
         List<String> trigramsM = Reader.createTrigram("<" + word + ">");
 
-        dicoTrigramMap = Reader.triGramFinder("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt");
+        dicoTrigramMap = Reader.triGramFinder(path);
 
         List<String> commonTrigramsWords = findCommunTrigramList(trigramsM);
 
@@ -91,13 +91,12 @@ public class Correction {
         return LevenshteinDistance.CalculateDistanceLevenshtein(word1, word2);
     }
 
-    public static void main(String[] args) {
-        dictionary.addAll(Reader.readLines("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt"));
-
-        String motM = "reddation";
-        List<String> motsProches = correction(motM);
-
-    }
+    //public static void main(String[] args) {
+    //    String minidico = "C:\\Users\\chris\\Downloads\\TP2\\minidico.txt";
+    //    dictionary.addAll(Reader.readLines("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt"));
+    //    String motM = "reddation";
+    //    List<String> motsProches = correction(motM);
+    // }
 
 
 }
