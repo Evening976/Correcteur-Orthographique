@@ -23,10 +23,10 @@ public class Reader {
         return lines;
     }
 
-    public static Map<String, List<String>> triGramFinder (String filePath) {
+    public static HashMap<String, List<String>> triGramFinder (String filePath) {
         List<String> dictionary = readLines(filePath);
 
-        Map<String, List<String>> trigramAssociations = new HashMap<>();
+        HashMap<String, List<String>> trigramAssociations = new HashMap<>();
 
         for (String word : dictionary) {
             String specialChar = "<" + word + ">";
@@ -38,7 +38,7 @@ public class Reader {
             }
         }
 
-       printTrigram(trigramAssociations);
+       //printTrigram(trigramAssociations);
 
         return trigramAssociations;
     }

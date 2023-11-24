@@ -6,76 +6,98 @@ import java.util.Map;
 public class Correction {
 
     private static List<String> dictionary = new ArrayList<>();
-    private static Map<String, List<String>> trigramList = new HashMap<>();
+    private static HashMap<String, List<String>> dicoTrigramMap = new HashMap<>();
 
-    public static void main(String[] args) {
-        dictionary.addAll(Reader.readLines("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt"));
+    static List<String> correction(String word) {
 
-        String motM = "algorythmique";
-
-        if (!inDictionary(motM)) {
-            System.out.println("the word :  " + motM + " is not in the dictionary.");
-            return;
+        if (inDictionary(word)) {
+            System.out.printf("\n --> the word \"%s\" is in the dictionary, no need to correct it ! \n", word);
+            return new ArrayList<>();
         }
 
-        List<String> trigramsM = findTrigram("<" + motM + ">");
+        List<String> trigramsM = Reader.createTrigram("<" + word + ">");
 
-        List<String> commonTrigrams = findCommunTrigramList(trigramsM);
+        dicoTrigramMap = Reader.triGramFinder("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt");
 
-        Map<String, Integer> occurrenceCount = calculateOccurrences(commonTrigrams, trigramsM);
+        List<String> commonTrigramsWords = findCommunTrigramList(trigramsM);
 
-        List<String> motsSelectionnes = selectWordsWithMaxTrigrams(occurrenceCount, 100);
+        Map<String, Integer> occurrenceCount = calculateOccurrences(commonTrigramsWords, trigramsM);
 
-        List<String> motsProches = selectClosetWords(motM, motsSelectionnes, 5);
+        List<String> selectedWords = selectWordsWithMaxTrigrams(occurrenceCount, 100);
 
-        System.out.println("Mots suggérés : " + motsProches);
+        List<String> closestWords = selectClosetWords(word, selectedWords, 5);
+
+        if(closestWords.isEmpty()) {
+            System.out.printf("\n --> the word \"%s\" is not in the dictionary and no close word was found ! \n", word);
+            return new ArrayList<>();
+        }
+
+        //System.out.println("top 5 words found : " + closestWords);
+        System.out.printf("\n --> the correction for the word \"%s\" is  : \"%s\" \n", word, closestWords.get(0));
+
+        return closestWords;
     }
 
     private static boolean inDictionary(String mot) {
         return dictionary.contains(mot);
     }
 
-    private static List<String> findTrigram(String mot) {
-        List<String> trigrammes = new ArrayList<>();
-        for (int i = 0; i < mot.length() - 2; i++) {
-            trigrammes.add(mot.substring(i, i + 3));
-        }
-        return trigrammes;
-    }
 
-    private static List<String> findCommunTrigramList(List<String> trigrammesM) {
-        List<String> wordsCommonTrigrams = new ArrayList<>();
-        for (String trigram : trigrammesM) {
-            wordsCommonTrigrams.addAll(trigramList.getOrDefault(trigram, new ArrayList<>()));
+    private static List<String> findCommunTrigramList(List<String> trigramsM) {
+        List<String> communTrigramList = new ArrayList<>();
+        for (String trigram : trigramsM) {
+            List<String> mots = dicoTrigramMap.get(trigram);
+            if (mots != null) {
+                communTrigramList.addAll(mots);
+            }
         }
-        return wordsCommonTrigrams;
+        return communTrigramList;
     }
 
     private static Map<String, Integer> calculateOccurrences(List<String> mots, List<String> trigrammesM) {
         Map<String, Integer> wordOccurrence = new HashMap<>();
+
         for (String mot : mots) {
             for (String trigram : trigrammesM) {
-                wordOccurrence.put(mot, wordOccurrence.getOrDefault(mot, 0) + trigramList.getOrDefault(trigram, new ArrayList<>()).size());
+                List<String> trigramWords = dicoTrigramMap.getOrDefault(trigram, new ArrayList<>());
+                wordOccurrence.put(mot, wordOccurrence.getOrDefault(mot, 0) + trigramWords.size());
             }
         }
+
         return wordOccurrence;
     }
 
+
     private static List<String> selectWordsWithMaxTrigrams(Map<String, Integer> occurrencesParMot, int limite) {
-        occurrencesParMot.entrySet().stream()
-                .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
+        List<String> selectedWords = new ArrayList<>();
+
+        occurrencesParMot.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .limit(limite)
                 .map(Map.Entry::getKey)
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        return new ArrayList<>(occurrencesParMot.keySet());
+                .forEach(selectedWords::add);
+
+        return selectedWords;
     }
 
-    private static List<String> selectClosetWords(String mot, List<String> mots, int nombre) {
-        mots.sort((mot1, mot2) -> Integer.compare(calculateLevenshteinDistance(mot, mot1), calculateLevenshteinDistance(mot, mot2)));
-        return mots.subList(0, Math.min(nombre, mots.size()));
+
+    private static List<String> selectClosetWords(String word, List<String> words, int nombre) {
+        words.sort((mot1, mot2) -> Integer.compare(calculateLevenshteinDistance(word, mot1), calculateLevenshteinDistance(word, mot2)));
+        return words.subList(0, Math.min(nombre, words.size()));
     }
 
     private static int calculateLevenshteinDistance(String word1, String word2) {
         return LevenshteinDistance.CalculateDistanceLevenshtein(word1, word2);
     }
+
+    public static void main(String[] args) {
+        dictionary.addAll(Reader.readLines("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt"));
+
+        String motM = "reddation";
+        List<String> motsProches = correction(motM);
+
+    }
+
+
 }
