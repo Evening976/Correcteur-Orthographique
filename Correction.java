@@ -1,27 +1,35 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Correction {
 
-    private static List<String> dictionary = new ArrayList<>();
-    private static HashMap<String, List<String>> dicoTrigramMap = new HashMap<>();
+    private  List<String> dictionary = new ArrayList<>();
+    private HashMap<String, List<String>> dicoTrigramMap = new HashMap<>();
 
-    static List<String> correction(String word, String path) {
+    public Correction(List<String> baseDictionary) {
+        dictionary = baseDictionary;
+        dicoTrigramMap = new HashMap<>();
+
+    }
+
+
+    public List<String> correct(String word, List<String> dictionary) {
+        this.dictionary = dictionary;
+
+        System.out.println("\nCorrecting the word : " + word);
+
 
         if (inDictionary(word)) {
             System.out.printf("\n --> the word \"%s\" is in the dictionary, no need to correct it ! \n", word);
             return new ArrayList<>();
         }
 
-        List<String> trigramsM = Reader.createTrigram("<" + word + ">");
+        List<String> wordTrigrams = TrigramUtils.createTrigram(word);
 
-        dicoTrigramMap = Reader.triGramFinder(path);
+        TrigramUtils.fastTrigramFinder(dictionary, dicoTrigramMap);
 
-        List<String> commonTrigramsWords = findCommunTrigramList(trigramsM);
+        HashSet<String> commonTrigramsWords = findCommonTrigramList(wordTrigrams);
 
-        Map<String, Integer> occurrenceCount = calculateOccurrences(commonTrigramsWords, trigramsM);
+        Map<String, Integer> occurrenceCount = calculateOccurrences(commonTrigramsWords, wordTrigrams);
 
         List<String> selectedWords = selectWordsWithMaxTrigrams(occurrenceCount, 100);
 
@@ -32,35 +40,40 @@ public class Correction {
             return new ArrayList<>();
         }
 
-        //System.out.println("top 5 words found : " + closestWords);
-        System.out.printf("\n --> the correction for the word \"%s\" is  : \"%s\" \n", word, closestWords.get(0));
+        //System.out.printf(" --> the correction for the word \"%s\" is  : \"%s\" \n", word, closestWords.get(0));
 
         return closestWords;
     }
 
-    private static boolean inDictionary(String mot) {
+    private boolean inDictionary(String mot) {
         return dictionary.contains(mot);
     }
 
 
-    private static List<String> findCommunTrigramList(List<String> trigramsM) {
-        List<String> communTrigramList = new ArrayList<>();
+    private HashSet<String> findCommonTrigramList(List<String> trigramsM) {
+        HashSet<String> communTrigramList = new HashSet<>();
+
         for (String trigram : trigramsM) {
             List<String> mots = dicoTrigramMap.get(trigram);
-            if (mots != null) {
+            if (dicoTrigramMap.get(trigram) != null) {
                 communTrigramList.addAll(mots);
             }
         }
+
         return communTrigramList;
     }
 
-    private static Map<String, Integer> calculateOccurrences(List<String> mots, List<String> trigrammesM) {
+    private Map<String, Integer> calculateOccurrences(HashSet<String> trigrammesDico, List<String> trigrammesCible) {
         Map<String, Integer> wordOccurrence = new HashMap<>();
 
-        for (String mot : mots) {
-            for (String trigram : trigrammesM) {
-                List<String> trigramWords = dicoTrigramMap.getOrDefault(trigram, new ArrayList<>());
-                wordOccurrence.put(mot, wordOccurrence.getOrDefault(mot, 0) + trigramWords.size());
+        for (String trigram : trigrammesCible) {
+            List<String> trigramWords = dicoTrigramMap.get(trigram);
+            if (trigramWords != null) {
+                for (String word : trigramWords) {
+                    if (trigrammesDico.contains(word)) {
+                        wordOccurrence.put(word, wordOccurrence.getOrDefault(word, 0) + 1);
+                    }
+                }
             }
         }
 
@@ -68,7 +81,7 @@ public class Correction {
     }
 
 
-    private static List<String> selectWordsWithMaxTrigrams(Map<String, Integer> occurrencesParMot, int limite) {
+    private List<String> selectWordsWithMaxTrigrams(Map<String, Integer> occurrencesParMot, int limite) {
         List<String> selectedWords = new ArrayList<>();
 
         occurrencesParMot.entrySet()
@@ -82,13 +95,14 @@ public class Correction {
     }
 
 
-    private static List<String> selectClosetWords(String word, List<String> words, int nombre) {
+    private  List<String> selectClosetWords(String word, List<String> words, int nombre) {
         words.sort((mot1, mot2) -> Integer.compare(calculateLevenshteinDistance(word, mot1), calculateLevenshteinDistance(word, mot2)));
+        System.out.println("The closest words are : " + words.subList(0, Math.min(nombre, words.size())));
         return words.subList(0, Math.min(nombre, words.size()));
     }
 
-    private static int calculateLevenshteinDistance(String word1, String word2) {
-        return LevenshteinDistance.CalculateDistanceLevenshtein(word1, word2);
+    private int calculateLevenshteinDistance(String word1, String word2) {
+        return Levenshtein.getDistance(word1, word2);
     }
 
     //public static void main(String[] args) {
