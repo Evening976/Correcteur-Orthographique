@@ -1,8 +1,6 @@
 # Correcteur Orthographique
 
-### Groupe 3 : LEFEVRE Quentin & SLAYBI Christopher
-
-Dans le cadre de ce travail pratique, l'objectif est de mettre en œuvre un système de correction automatique de mots à l'aide de trigrammes. La fonction principale, correct, tente de corriger un mot lorsque il n'apparait pas tel qu'il est écrit dans le dictionnaire.
+Dans le cadre de ce travail en binôme, l'objectif est de mettre en œuvre un système de correction automatique de mots à l'aide de trigrammes. La fonction principale, correct, tente de corriger un mot lorsque il n'apparait pas tel qu'il est écrit dans le dictionnaire.
 
 L'analyse de la complexité de la fonction correct s'articule autour de plusieurs étapes clés :
 
