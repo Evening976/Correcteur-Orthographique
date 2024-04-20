@@ -1,6 +1,6 @@
 public class Levenshtein {
 
-    public static void main(String[] args) {
+    public static void test(String[] args) {
         String word1 = "logarytmique";
         String word2 = "algorithmique";
 

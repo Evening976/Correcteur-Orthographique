@@ -2,30 +2,25 @@ import java.util.*;
 
 public class Correction {
 
-    private  List<String> dictionary = new ArrayList<>();
-    private HashMap<String, List<String>> dicoTrigramMap = new HashMap<>();
+    private final Set<String> dictionary;
+    private final HashMap<String, List<String>> dicoTrigramMap;
 
-    public Correction(List<String> baseDictionary) {
+    public Correction(Set<String> baseDictionary) {
         dictionary = baseDictionary;
         dicoTrigramMap = new HashMap<>();
-
+        TrigramUtils.processDictionnary(dictionary, dicoTrigramMap);
     }
 
 
-    public List<String> correct(String word, List<String> dictionary) {
-        this.dictionary = dictionary;
-
+    public void correct(String word) {
         System.out.println("\nCorrecting the word : " + word);
-
 
         if (inDictionary(word)) {
             System.out.printf("\n --> the word \"%s\" is in the dictionary, no need to correct it ! \n", word);
-            return new ArrayList<>();
+            return;
         }
 
         List<String> wordTrigrams = TrigramUtils.createTrigram(word);
-
-        TrigramUtils.fastTrigramFinder(dictionary, dicoTrigramMap);
 
         HashSet<String> commonTrigramsWords = findCommonTrigramList(wordTrigrams);
 
@@ -33,16 +28,11 @@ public class Correction {
 
         List<String> selectedWords = selectWordsWithMaxTrigrams(occurrenceCount, 100);
 
-        List<String> closestWords = selectClosetWords(word, selectedWords, 5);
+        List<String> closestWords = selectClosestWords(word, selectedWords, 5);
 
         if(closestWords.isEmpty()) {
             System.out.printf("\n --> the word \"%s\" is not in the dictionary and no close word was found ! \n", word);
-            return new ArrayList<>();
         }
-
-        //System.out.printf(" --> the correction for the word \"%s\" is  : \"%s\" \n", word, closestWords.get(0));
-
-        return closestWords;
     }
 
     private boolean inDictionary(String mot) {
@@ -95,22 +85,18 @@ public class Correction {
     }
 
 
-    private  List<String> selectClosetWords(String word, List<String> words, int nombre) {
-        words.sort((mot1, mot2) -> Integer.compare(calculateLevenshteinDistance(word, mot1), calculateLevenshteinDistance(word, mot2)));
+    private  List<String> selectClosestWords(String word, List<String> words, int nombre) {
+        TreeMap<String, Integer> wordDistance = new TreeMap<>();
+        for(String mot : words) {
+            wordDistance.put(mot, getDistance(word, mot));
+        }
+
+        words.sort(Comparator.comparingInt(wordDistance::get));
         System.out.println("The closest words are : " + words.subList(0, Math.min(nombre, words.size())));
         return words.subList(0, Math.min(nombre, words.size()));
     }
 
-    private int calculateLevenshteinDistance(String word1, String word2) {
+    private int getDistance(String word1, String word2) {
         return Levenshtein.getDistance(word1, word2);
     }
-
-    //public static void main(String[] args) {
-    //    String minidico = "C:\\Users\\chris\\Downloads\\TP2\\minidico.txt";
-    //    dictionary.addAll(Reader.readLines("C:\\Users\\chris\\Downloads\\TP2\\minidico.txt"));
-    //    String motM = "reddation";
-    //    List<String> motsProches = correction(motM);
-    // }
-
-
 }

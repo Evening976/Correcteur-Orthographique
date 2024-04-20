@@ -1,15 +1,12 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Reader {
 
-    public static List<String> readLines(String filePath) {
-        List<String> lines = new ArrayList<>();
+    public static Set<String> readLines(String filePath) {
+        HashSet<String> lines = new HashSet<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 
             String line;
